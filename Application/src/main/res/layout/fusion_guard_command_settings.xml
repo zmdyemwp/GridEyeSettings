@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1"
+    android:background="#ff7f7f">
+
+    <TextView
+        android:text="Fusion Guard Command"
+        android:textSize="@dimen/chapter_title_font_size"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <include layout="@layout/division"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp">
+
+        <RadioButton
+            android:text="Leaving"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:id="@+id/detect_leaving"
+            android:textSize="@dimen/sub_title_font_size"
+            android:textStyle="bold"
+            android:layout_weight="1" />
+
+        <RadioButton
+            android:text="Stay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:textSize="@dimen/sub_title_font_size"
+            android:textStyle="bold"
+            android:id="@+id/detect_stay"
+            android:layout_weight="1" />
+
+        <RadioButton
+            android:text="Patrol"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:textSize="@dimen/sub_title_font_size"
+            android:textStyle="bold"
+            android:id="@+id/detect_patrol"
+            android:layout_weight="1" />
+    </RadioGroup>
+
+    <Button
+        android:text="Reset Fusion Guard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/reset_fusion_guard"
+        android:textSize="@dimen/main_title_font_size"
+        android:textStyle="bold"
+        android:layout_weight="0.08" />
+</LinearLayout>

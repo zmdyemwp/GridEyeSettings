@@ -20,7 +20,10 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.SimpleExpandableListAdapter;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.math.BigInteger;
@@ -34,7 +37,14 @@ import android.widget.Toast;
 import java.util.UUID;
 
 import android.os.Handler;
+
+import org.w3c.dom.Text;
+
 import java.lang.Runnable;
+
+import static android.R.attr.value;
+import static android.R.attr.y;
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
 
 /**
  * For a given BLE device, this Activity provides the user interface to configure the settings
@@ -121,11 +131,7 @@ public class DeviceConfigureActivity extends Activity {
                 Bundle bundle = intent.getExtras();
                 if(bundle != null) {
                     byte[] value = bundle.getByteArray(BluetoothLeService.EXTRA_DATA);
-                    if(0x01 == value[0]) {
-                        displayCurrentConfig_1(value);
-                    } else if(0x02 == value[0]) {
-                        displayCurrentConfig_2(value);
-                    }
+                    displayCurrentConfig(value);
                     for(int i = 0; i < value.length; i++) {
                         Log.d(TAG, String.format("[%d] 0x%02x", i, value[i]));
                     }
@@ -224,7 +230,7 @@ public class DeviceConfigureActivity extends Activity {
         String str = mET_DiffTempThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // 整數
+            // ?�數
             int b = a.intValue();
             value[1] = (byte)b;
             Log.d(TAG, "value[0] = " + b);
@@ -257,7 +263,7 @@ public class DeviceConfigureActivity extends Activity {
         /*str = mET_CheckSumMove.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // 整數
+            // ?�數
             int b = a.intValue();
             value[6] = (byte)b;
             Log.d(TAG, "value[6] = " + b);
@@ -271,7 +277,7 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_CheckDiffArea.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // 整數
+            // ?�數
             int b = a.intValue();
             value[8] = (byte)b;
             Log.d(TAG, "value[8] = " + b);
@@ -291,7 +297,7 @@ public class DeviceConfigureActivity extends Activity {
         /*str = mET_QuiltMoveThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // 整數
+            // ?�數
             int b = a.intValue();
             value[11] = (byte)b;
             Log.d(TAG, "value[11] = " + b);
@@ -305,7 +311,7 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_QuiltAreaThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // 整數
+            // ?�數
             int b = a.intValue();
             value[13] = (byte)b;
             Log.d(TAG, "value[13] = " + b);
@@ -357,19 +363,24 @@ public class DeviceConfigureActivity extends Activity {
     }
 
     private void clearUI() {
-        mGattServicesList.setAdapter((SimpleExpandableListAdapter) null);
+        // mGattServicesList.setAdapter((SimpleExpandableListAdapter) null);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.device_configuration);
+        /* MinSMChien - New Fusion Guard Settings */
+        // setContentView(R.layout.device_configuration);
+        setContentView(R.layout.fusion_guard_settings);
+        initUI();
+        /* MinSMChien - New Fusion Guard Settings */
 
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
 
         // Sets up UI references.
+        /*
         ((TextView) findViewById(R.id.device_address)).setText(mDeviceAddress);
         mGattServicesList = (ExpandableListView) findViewById(R.id.gatt_services_list);
         mGattServicesList.setOnChildClickListener(servicesListClickListner);
@@ -429,7 +440,7 @@ public class DeviceConfigureActivity extends Activity {
 
         mSetBtn = (Button) findViewById(R.id.btn_set);
         mSetBtn.setOnClickListener(new BtnOnClickListener());
-
+        */
         getActionBar().setTitle(mDeviceName);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
@@ -437,6 +448,308 @@ public class DeviceConfigureActivity extends Activity {
 
     }
 
+
+
+
+    Switch mIPCameraEnable;
+    TextView mIPCameraIPAddress_1;
+    TextView mIPCameraIPAddress_2;
+    TextView mIPCameraIPAddress_3;
+    TextView mIPCameraIPAddress_4;
+    TextView mIPCameraCaptureFreq;
+    TextView mFTPIPAddress_1;
+    TextView mFTPIPAddress_2;
+    TextView mFTPIPAddress_3;
+    TextView mFTPIPAddress_4;
+    TextView mSocketServerIPAddress_1;
+    TextView mSocketServerIPAddress_2;
+    TextView mSocketServerIPAddress_3;
+    TextView mSocketServerIPAddress_4;
+    TextView mLogUploadFreq;
+    TextView mLogUploadSize;
+    Switch mFusionGuardEnable;
+
+    RadioButton mLeavingRadio;
+    RadioButton mStayRadio;
+    RadioButton mPatrolRadio;
+    Button mResetFusionGuard;
+
+    TextView mPatrolInterval;
+    TextView mPatrolTempDiffThreshold;
+    TextView mPatrolObjectSize;
+    TextView mPatrolCeilingHeight;
+
+    TextView mStayAlarmTime;
+    TextView mStayTempDiffThreshold;
+    TextView mStayObjctSize;
+    TextView mBathroomLength;
+    TextView mBathroomWidth;
+    TextView mBathroomHeight;
+
+    TextView mWardTempDiffThreshold;
+    TextView mWardObjctSize;
+    TextView mBedLength;
+    TextView mBedWidth;
+    TextView mWardCeilingHeight;
+
+    Button mCommitSetting;
+    void initUI() {
+        LinearLayout main = (LinearLayout)findViewById(R.id.fusion_guard_basic_settings);
+        mIPCameraEnable = (Switch)main.findViewById(R.id.ip_camera_switch);
+        mIPCameraIPAddress_1 = (TextView)main.findViewById(R.id.ip_camera_ip_address_1);
+        mIPCameraIPAddress_2 = (TextView)main.findViewById(R.id.ip_camera_ip_address_2);
+        mIPCameraIPAddress_3 = (TextView)main.findViewById(R.id.ip_camera_ip_address_3);
+        mIPCameraIPAddress_4 = (TextView)main.findViewById(R.id.ip_camera_ip_address_4);
+        mIPCameraCaptureFreq = (TextView)main.findViewById(R.id.ip_camera_capture_freq);
+        mFTPIPAddress_1 = (TextView)main.findViewById(R.id.ftp_addr_1);
+        mFTPIPAddress_2 = (TextView)main.findViewById(R.id.ftp_addr_2);
+        mFTPIPAddress_3 = (TextView)main.findViewById(R.id.ftp_addr_3);
+        mFTPIPAddress_4 = (TextView)main.findViewById(R.id.ftp_addr_4);
+        mLogUploadFreq = (TextView)main.findViewById(R.id.log_upload_freq);
+        mLogUploadSize = (TextView)main.findViewById(R.id.log_upload_size);
+        mSocketServerIPAddress_1 = (TextView)main.findViewById(R.id.socket_ip_1);
+        mSocketServerIPAddress_2 = (TextView)main.findViewById(R.id.socket_ip_2);
+        mSocketServerIPAddress_3 = (TextView)main.findViewById(R.id.socket_ip_3);
+        mSocketServerIPAddress_4 = (TextView)main.findViewById(R.id.socket_ip_4);
+        mFusionGuardEnable = (Switch)main.findViewById(R.id.fusion_guard_switch);
+
+        LinearLayout command = (LinearLayout)findViewById(R.id.fusion_guard_command_settings);
+        mLeavingRadio = (RadioButton)command.findViewById(R.id.detect_leaving);
+        mStayRadio = (RadioButton)command.findViewById(R.id.detect_stay);
+        mPatrolRadio = (RadioButton)command.findViewById(R.id.detect_patrol);
+        mResetFusionGuard = (Button)command.findViewById(R.id.reset_fusion_guard);
+        mResetFusionGuard.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                setmResetFusionGuard();
+            }
+        });
+
+        LinearLayout protection = (LinearLayout)findViewById(R.id.fusion_guard_protection_room);
+        mPatrolInterval = (TextView)protection.findViewById(R.id.patrol_interval);
+        mPatrolTempDiffThreshold = (TextView)protection.findViewById(R.id.protect_temp_diff_threshold);
+        mPatrolObjectSize = (TextView)protection.findViewById(R.id.protect_object_size_threshold);
+        mPatrolCeilingHeight = (TextView)protection.findViewById(R.id.protection_room_ceiling_height);
+
+        LinearLayout bathroom = (LinearLayout)findViewById(R.id.fusion_guard_bath_room);
+        mStayAlarmTime = (TextView)bathroom.findViewById(R.id.stay_alarm_time);
+        mStayTempDiffThreshold = (TextView)bathroom.findViewById(R.id.stay_temp_diff_threshold);
+        mStayObjctSize = (TextView)bathroom.findViewById(R.id.stay_object_size_threshold);
+        mBathroomLength = (TextView)bathroom.findViewById(R.id.bathroom_length);
+        mBathroomWidth = (TextView)bathroom.findViewById(R.id.bathroom_width);
+        mBathroomHeight = (TextView)bathroom.findViewById(R.id.bathroom_height);
+
+        LinearLayout ward = (LinearLayout)findViewById(R.id.fusion_guard_ward);
+        mWardTempDiffThreshold = (TextView)ward.findViewById(R.id.leaving_temp_diff_threshold);
+        mWardObjctSize = (TextView)ward.findViewById(R.id.leaving_object_size_threshold);
+        mBedLength = (TextView)ward.findViewById(R.id.bed_length);
+        mBedWidth = (TextView)ward.findViewById(R.id.bed_width);
+        mWardCeilingHeight = (TextView)ward.findViewById(R.id.ward_ceiling_height);
+
+        mCommitSetting = (Button)findViewById(R.id.commit_settings);
+        mCommitSetting.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                commit();
+            }
+        });
+    }
+
+    void setmResetFusionGuard() {
+        writeConfigGroup(4);
+    }
+
+    void commit() {
+        writeConfigGroup(1);
+        sleep(500);
+        writeConfigGroup(2);
+        sleep(500);
+        writeConfigGroup(3);
+        sleep(500);
+        // writeConfigGroup(4);
+        writeConfigGroup(5);
+        sleep(500);
+        writeConfigGroup(6);
+        sleep(500);
+        writeConfigGroup(7);
+    }
+
+    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_1 = 13;
+    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_2 = 9;
+    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_3 = 2;
+    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_4 = 2;
+    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_5 = 8;
+    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_6 = 12;
+    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_7 = 10;
+
+
+    void writeConfigGroup(int group) {
+        byte[] values;
+        String str;
+        switch(group) {
+            case 1:
+                values = new byte[FUSION_GUARD_CONFIG_LENGTH_GROUP_1];
+                // IP Camera IP Address
+                str = mIPCameraIPAddress_1.getText().toString();
+                get1ByteInteger(str, values, 1);
+                str = mIPCameraIPAddress_2.getText().toString();
+                get1ByteInteger(str, values, 2);
+                str = mIPCameraIPAddress_3.getText().toString();
+                get1ByteInteger(str, values, 3);
+                str = mIPCameraIPAddress_4.getText().toString();
+                get1ByteInteger(str, values, 4);
+
+                //  FTP IP Address
+                str = mFTPIPAddress_1.getText().toString();
+                get1ByteInteger(str, values, 5);
+                str = mFTPIPAddress_2.getText().toString();
+                get1ByteInteger(str, values, 6);
+                str = mFTPIPAddress_3.getText().toString();
+                get1ByteInteger(str, values, 7);
+                str = mFTPIPAddress_4.getText().toString();
+                get1ByteInteger(str, values, 8);
+
+                //  Socket Server IP Address
+                str = mSocketServerIPAddress_1.getText().toString();
+                get1ByteInteger(str, values, 9);
+                str = mSocketServerIPAddress_2.getText().toString();
+                get1ByteInteger(str, values, 10);
+                str = mSocketServerIPAddress_3.getText().toString();
+                get1ByteInteger(str, values, 11);
+                str = mSocketServerIPAddress_4.getText().toString();
+                get1ByteInteger(str, values, 12);
+                break;
+            case 2:
+                values = new byte[FUSION_GUARD_CONFIG_LENGTH_GROUP_2];
+                values[1] = mIPCameraEnable.isChecked()? (byte)0x01:0x00;
+                str = mIPCameraCaptureFreq.getText().toString();
+                get2ByteInteger(str, values, 2);
+                str = mLogUploadFreq.getText().toString();
+                get2ByteInteger(str, values, 4);
+                str = mLogUploadSize.getText().toString();
+                get2ByteInteger(str, values, 6);
+                values[8] = mFusionGuardEnable.isChecked()? (byte)0x01:0x00;
+                break;
+            case 3:
+                values = new byte[FUSION_GUARD_CONFIG_LENGTH_GROUP_3];
+                values[1] = 0;
+                if(mLeavingRadio.isChecked()) {
+                    values[1] = 0;
+                } else if(mStayRadio.isChecked()) {
+                    values[1] = (byte)1;
+                } else if(mPatrolRadio.isChecked()) {
+                    values[1] = (byte)2;
+                }
+                break;
+            case 4:
+                values = new byte[FUSION_GUARD_CONFIG_LENGTH_GROUP_4];
+                values[1] = (byte)1;
+                break;
+            case 5:
+                values = new byte[FUSION_GUARD_CONFIG_LENGTH_GROUP_5];
+                str = mPatrolInterval.getText().toString();
+                get2ByteInteger(str, values, 1);
+                str = mPatrolTempDiffThreshold.getText().toString();
+                get2ByteFloat(str, values, 3);
+                str = mPatrolObjectSize.getText().toString();
+                get1ByteInteger(str, values, 5);
+                str = mPatrolCeilingHeight.getText().toString();
+                get2ByteFloat(str, values, 6);
+                break;
+            case 6:
+                values = new byte[FUSION_GUARD_CONFIG_LENGTH_GROUP_6];
+                str = mStayAlarmTime.getText().toString();
+                get2ByteInteger(str, values, 1);
+                str = mStayTempDiffThreshold.getText().toString();
+                get2ByteFloat(str, values, 3);
+                str = mStayObjctSize.getText().toString();
+                get1ByteInteger(str, values, 5);
+                str = mBathroomLength.getText().toString();
+                get2ByteFloat(str, values, 6);
+                str = mBathroomWidth.getText().toString();
+                get2ByteFloat(str, values, 8);
+                str = mBathroomHeight.getText().toString();
+                get2ByteFloat(str, values,10);
+                break;
+            case 7:
+                values = new byte[FUSION_GUARD_CONFIG_LENGTH_GROUP_7];
+                str = mWardTempDiffThreshold.getText().toString();
+                get2ByteFloat(str, values, 1);
+                str = mWardObjctSize.getText().toString();
+                get1ByteInteger(str, values, 3);
+                str = mBedLength.getText().toString();
+                get2ByteFloat(str, values, 4);
+                str = mBedWidth.getText().toString();
+                get2ByteFloat(str, values, 6);
+                str = mWardCeilingHeight.getText().toString();
+                get2ByteFloat(str, values, 8);
+                break;
+            default:
+                values = null;
+                break;
+        }
+        if(null == values) {
+            return;
+        }
+        values[0] = (byte)group;
+        for(int x = 0; x < values.length; x++) {
+            Log.d("MIN", String.format("[%02d] (0x%02x)", x, values[x]));
+        }
+
+        final BluetoothGattCharacteristic characteristic = mBluetoothLeService.getDeviceCharacteristic();
+        if(characteristic != null) {
+            final int charaProp = characteristic.getProperties();
+            if ((charaProp | BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) {
+                mBluetoothLeService.setSendByteArr(values);
+                mBluetoothLeService.writeCharacteristic(characteristic);
+            } else {
+                Log.d(TAG, "The target characteristic has no write property !");
+                Toast.makeText(this, "The target characteristic has no write property !", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+    void get2ByteFloat(String str, byte[] values, int offset) {
+        if(null == values || 0 > offset || values.length <= 1+offset) {
+            return;
+        }
+        if(null == str || str.isEmpty()) {
+            values[offset] = 0;
+            values[offset + 1] = 0;
+            return;
+        }
+        Float f = Float.parseFloat(str);
+        values[offset] = (byte)f.intValue();
+        int i = str.indexOf('.');
+        if(-1 == i || str.length() == 1+i) {
+            values[1+offset] = 0;
+        } else {
+            values[1+offset] = (byte)Integer.parseInt(str.substring(1 + i));
+        }
+    }
+    void get2ByteInteger(String str, byte[] values, int offset) {
+        if(null == values || 0 > offset || values.length <= 1+offset) {
+            return;
+        }
+        if(null == str || str.isEmpty()) {
+            values[offset] = 0;
+            values[offset + 1] = 0;
+            return;
+        }
+        int i = Integer.parseInt(str);
+        values[offset] = (byte)i;
+        i >>= 8;
+        values[offset + 1] = (byte)i;
+    }
+    void get1ByteInteger(String str, byte[] values, int offset) {
+        if(null == values || 0 > offset || values.length <= offset) {
+            return;
+        }
+        if(null == str || str.isEmpty()) {
+            values[offset] = 0;
+            return;
+        }
+        values[offset] = (byte)Integer.parseInt(str);
+    }
 
     @Override
     protected void onResume() {
@@ -513,7 +826,7 @@ public class DeviceConfigureActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mConnectionState.setText(resourceId);
+                // mConnectionState.setText(resourceId);
             }
         });
     }
@@ -544,7 +857,7 @@ public class DeviceConfigureActivity extends Activity {
                 //characteristic.setValue(value);
                 mBluetoothLeService.writeCharacteristic(characteristic);
 
-                try {Thread.sleep(500);} catch(Exception e) {Log.e("MIN", e.toString());}
+                sleep(500);
 
                 value = getConfigureByteArray2();
                 for(int i = 0; i < value.length; i++) {
@@ -562,7 +875,7 @@ public class DeviceConfigureActivity extends Activity {
         /*String str = mET_DiffTempThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // 整數
+            // ?�數
             int b = a.intValue();
             //value[0] = (byte)b;
             Log.d(TAG, "value[0] = " + b);
@@ -595,7 +908,7 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_CheckSumMove.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // 整數
+            // ?�數
             int b = a.intValue();
             //value[6] = (byte)b;
             Log.d(TAG, "value[6] = " + b);
@@ -609,7 +922,7 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_CheckDiffArea.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // 整數
+            // ?�數
             int b = a.intValue();
             //value[8] = (byte)b;
             Log.d(TAG, "value[8] = " + b);
@@ -629,7 +942,7 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_QuiltMoveThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // 整數
+            // ?�數
             int b = a.intValue();
             //value[11] = (byte)b;
             Log.d(TAG, "value[11] = " + b);
@@ -643,7 +956,7 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_QuiltAreaThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // 整數
+            // ?�數
             int b = a.intValue();
             //value[13] = (byte)b;
             Log.d(TAG, "value[13] = " + b);
@@ -698,15 +1011,10 @@ public class DeviceConfigureActivity extends Activity {
             final int charaProp = characteristic.getProperties();
             if ((charaProp | BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) {
                 byte[] cmd = new byte[1];
-                if(1 == requiredConfig) {
-                    cmd[0] = 0x01;
-                } else if(2 == requiredConfig) {
-                    cmd[0] = 0x02;
-                } else {
-                    return;
-                }
+                cmd[0] = (byte)requiredConfig;
                 mBluetoothLeService.setSendByteArr(cmd);
                 mBluetoothLeService.writeCharacteristic(characteristic);
+                sleep(500);
             } else {
                 Log.d(TAG, "The target characteristic has no write property !");
                 Toast.makeText(this, "The target characteristic has no write property !", Toast.LENGTH_SHORT).show();
@@ -714,26 +1022,38 @@ public class DeviceConfigureActivity extends Activity {
         }
     }
 
+
+    int group_id = 0;
+    Handler h = new Handler();
+    Runnable r = new Runnable() {
+        public void run() {
+            final BluetoothGattCharacteristic characteristic = mBluetoothLeService.getDeviceCharacteristic();
+            if(null != characteristic) {
+                askDevConfig(characteristic, group_id);
+                mBluetoothLeService.readCharacteristic(characteristic);
+                group_id++;
+                if(4 == group_id) group_id++;
+                if(8 > group_id) h.postDelayed(r, 1000);
+            }
+        }
+    };
+
     private void readCurrentConfig() {
         Log.d(TAG, "readCurrentConfig()");
         final BluetoothGattCharacteristic characteristic = mBluetoothLeService.getDeviceCharacteristic();
         if(characteristic != null) {
-            Log.d(TAG, "get target characteristic successfully !");
-            Log.d(TAG, "service UUID = " + characteristic.getService().getUuid());
-            Log.d(TAG, "characteristic UUID = " + characteristic.getUuid());
             final int charaProp = characteristic.getProperties();
             if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
-                Log.d(TAG, "readCharacteristic ---");
-                askDevConfig(characteristic, 1);
-                try {Thread.sleep(500);} catch(Exception e) {Log.e("MIN", e.toString());}
-                mBluetoothLeService.readCharacteristic(characteristic);
 
-                try {Thread.sleep(1000);} catch(Exception e) {Log.e("MIN", e.toString());}
+                /* MinSMChien - ReadConfig from GAP */
+                /*for(int i = 1; i <= 7; i++) {
+                    askDevConfig(characteristic, i);
+                    mBluetoothLeService.readCharacteristic(characteristic);
+                    sleep(500);
+                }*/
+                group_id = 1;
+                h.post(r);
 
-                askDevConfig(characteristic, 2);
-                try {Thread.sleep(500);} catch(Exception e) {Log.e("MIN", e.toString());}
-                mBluetoothLeService.readCharacteristic(characteristic);
-                // h.postDelayed(r, 500);
             } else {
                 Log.d(TAG, "The target characteristic has no read property !");
                 Toast.makeText(this, "The target characteristic has no read property !", Toast.LENGTH_SHORT).show();
@@ -741,15 +1061,10 @@ public class DeviceConfigureActivity extends Activity {
         }
     }
 
-    Handler h = new Handler();
-    Runnable r = new Runnable() {
-        public void run() {
-            final BluetoothGattCharacteristic characteristic = mBluetoothLeService.getDeviceCharacteristic();
-            if(characteristic != null) {
-                mBluetoothLeService.readCharacteristic(characteristic);
-            }
-        }
-    };
+
+    void sleep(int ms) {
+        try {Thread.sleep(ms);} catch(Exception e) {Log.e("MIN", e.toString());}
+    }
 
 
     private void readCurrentConfig_2() {
@@ -768,6 +1083,88 @@ public class DeviceConfigureActivity extends Activity {
                 Log.d(TAG, "The target characteristic has no read property !");
                 Toast.makeText(this, "The target characteristic has no read property !", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+
+
+    private static int getIntFromByte1(byte[] values, int offset) {
+        int result = 0;
+        if(0 <= offset && values.length > offset) {
+            Log.d("MIN", String.format("%02x", values[offset]));
+            result = (0xff & values[offset]);
+        }
+        return result;
+    }
+    private static int getIntFromByte2(byte[] values, int offset) {
+        int result = 0;
+        if(0 <= offset && values.length > offset + 1) {
+            Log.d("MIN", String.format("%02x.%02x", values[offset], values[offset + 1]));
+            result = (0xff & values[offset]) + ((0xff & values[offset + 1]) << 8);
+        }
+        return result;
+    }
+    private static String getFloatFromByte2(byte[] values, int offset) {
+        String result = "0";
+        if(0 <= offset && values.length > offset + 1) {
+            Log.d("MIN", String.format("%02x.%02x", values[offset], values[offset + 1]));
+            result = String.format("%d.%d", getIntFromByte1(values, offset), getIntFromByte1(values, offset + 1));
+            //String str = String.format("%d.%d", getIntFromByte1(values, offset), getIntFromByte1(values, offset + 1));
+            //result = Float.parseFloat(str);
+        }
+        return result;
+    }
+
+    private void displayCurrentConfig(byte[] value) {
+        switch(value[0]) {
+            case 1:
+                mIPCameraIPAddress_1.setText(String.format("%d", getIntFromByte1(value, 1)));
+                mIPCameraIPAddress_2.setText(String.format("%d", getIntFromByte1(value, 2)));
+                mIPCameraIPAddress_3.setText(String.format("%d", getIntFromByte1(value, 3)));
+                mIPCameraIPAddress_4.setText(String.format("%d", getIntFromByte1(value, 4)));
+                mFTPIPAddress_1.setText(String.format("%d", getIntFromByte1(value, 5)));
+                mFTPIPAddress_2.setText(String.format("%d", getIntFromByte1(value, 6)));
+                mFTPIPAddress_3.setText(String.format("%d", getIntFromByte1(value, 7)));
+                mFTPIPAddress_4.setText(String.format("%d", getIntFromByte1(value, 8)));
+                mSocketServerIPAddress_1.setText(String.format("%d", getIntFromByte1(value, 9)));
+                mSocketServerIPAddress_2.setText(String.format("%d", getIntFromByte1(value, 10)));
+                mSocketServerIPAddress_3.setText(String.format("%d", getIntFromByte1(value, 11)));
+                mSocketServerIPAddress_4.setText(String.format("%d", getIntFromByte1(value, 12)));
+                break;
+            case 2:
+                mIPCameraEnable.setChecked(0 < value[1]);
+                mIPCameraCaptureFreq.setText(String.format("%d", getIntFromByte2(value, 2)));
+                mLogUploadFreq.setText(String.format("%d", getIntFromByte2(value, 4)));
+                mLogUploadSize.setText(String.format("%d", getIntFromByte2(value, 6)));
+                mFusionGuardEnable.setChecked(0 < getIntFromByte1(value, 8));
+                break;
+            case 3:
+                int mode = getIntFromByte1(value, 1);
+                if(0 == mode) mLeavingRadio.setChecked(true);
+                else if(1 == mode) mStayRadio.setChecked(true);
+                else if(2 == mode) mPatrolRadio.setChecked(true);
+                break;
+            case 5:
+                mPatrolInterval.setText(String.format("%d", getIntFromByte2(value, 1)));
+                mPatrolTempDiffThreshold.setText(getFloatFromByte2(value, 3));
+                mPatrolObjectSize.setText(String.format("%d", getIntFromByte1(value, 5)));
+                mPatrolCeilingHeight.setText(getFloatFromByte2(value, 6));
+                break;
+            case 6:
+                mStayAlarmTime.setText(String.format("%d", getIntFromByte2(value, 1)));
+                mStayTempDiffThreshold.setText(getFloatFromByte2(value, 3));
+                mStayObjctSize.setText(String.format("%d", getIntFromByte1(value, 5)));
+                mBathroomLength.setText(getFloatFromByte2(value, 6));
+                mBathroomWidth.setText(getFloatFromByte2(value, 8));
+                mBathroomHeight.setText(getFloatFromByte2(value, 10));
+                break;
+            case 7:
+                mWardTempDiffThreshold.setText(getFloatFromByte2(value, 1));
+                mWardObjctSize.setText(String.format("%d", getIntFromByte1(value, 3)));
+                mBedLength.setText(getFloatFromByte2(value, 4));
+                mBedWidth.setText(getFloatFromByte2(value, 6));
+                mWardCeilingHeight.setText(getFloatFromByte2(value, 8));
+                break;
         }
     }
 

@@ -52,4 +52,11 @@
     <string name="ble_config_TopY" >TopY</string>
     <string name="ble_config_BottomY" >BottomY</string>
     <string name="ble_config_set_btn" >Set</string>
+
+    <string name="ip_camera_ip">Camera IP Address</string>
+    <string name="ftp_ip_address">FTP Address</string>
+    <string name="socket_server_ip_address">Socket IP Address</string>
+
+
+
 </resources>
