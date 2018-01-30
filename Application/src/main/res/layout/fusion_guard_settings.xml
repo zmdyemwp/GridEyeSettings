@@ -10,6 +10,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/main_title_font_size"
+                android:text="Debugging Mode:"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:id="@+id/debugging_mode"/>
+
             <include android:id="@+id/fusion_guard_basic_settings"
                 layout="@layout/fusion_guard_basic_settings"
                 android:layout_width="match_parent"

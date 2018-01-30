@@ -450,7 +450,7 @@ public class DeviceConfigureActivity extends Activity {
 
 
 
-
+    Switch mDebuggingMode;
     Switch mIPCameraEnable;
     TextView mIPCameraIPAddress_1;
     TextView mIPCameraIPAddress_2;
@@ -465,6 +465,7 @@ public class DeviceConfigureActivity extends Activity {
     TextView mSocketServerIPAddress_2;
     TextView mSocketServerIPAddress_3;
     TextView mSocketServerIPAddress_4;
+    TextView mSocketServerIPAddress_Port;
     TextView mLogUploadFreq;
     TextView mLogUploadSize;
     Switch mFusionGuardEnable;
@@ -494,6 +495,7 @@ public class DeviceConfigureActivity extends Activity {
 
     Button mCommitSetting;
     void initUI() {
+        mDebuggingMode = (Switch)findViewById(R.id.debugging_mode);
         LinearLayout main = (LinearLayout)findViewById(R.id.fusion_guard_basic_settings);
         mIPCameraEnable = (Switch)main.findViewById(R.id.ip_camera_switch);
         mIPCameraIPAddress_1 = (TextView)main.findViewById(R.id.ip_camera_ip_address_1);
@@ -511,6 +513,7 @@ public class DeviceConfigureActivity extends Activity {
         mSocketServerIPAddress_2 = (TextView)main.findViewById(R.id.socket_ip_2);
         mSocketServerIPAddress_3 = (TextView)main.findViewById(R.id.socket_ip_3);
         mSocketServerIPAddress_4 = (TextView)main.findViewById(R.id.socket_ip_4);
+        mSocketServerIPAddress_Port = (TextView)main.findViewById(R.id.socket_ip_port);
         mFusionGuardEnable = (Switch)main.findViewById(R.id.fusion_guard_switch);
 
         LinearLayout command = (LinearLayout)findViewById(R.id.fusion_guard_command_settings);
@@ -570,15 +573,18 @@ public class DeviceConfigureActivity extends Activity {
         writeConfigGroup(6);
         sleep(500);
         writeConfigGroup(7);
+        sleep(500);
+        writeConfigGroup(8);
     }
 
-    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_1 = 13;
+    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_1 = 15;
     private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_2 = 9;
     private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_3 = 2;
     private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_4 = 2;
     private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_5 = 8;
     private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_6 = 12;
     private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_7 = 10;
+    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_8 = 2;
 
 
     void writeConfigGroup(int group) {
@@ -616,6 +622,8 @@ public class DeviceConfigureActivity extends Activity {
                 get1ByteInteger(str, values, 11);
                 str = mSocketServerIPAddress_4.getText().toString();
                 get1ByteInteger(str, values, 12);
+                str = mSocketServerIPAddress_Port.getText().toString();
+                get2ByteInteger(str, values, 13);
                 break;
             case 2:
                 values = new byte[FUSION_GUARD_CONFIG_LENGTH_GROUP_2];
@@ -632,11 +640,11 @@ public class DeviceConfigureActivity extends Activity {
                 values = new byte[FUSION_GUARD_CONFIG_LENGTH_GROUP_3];
                 values[1] = 0;
                 if(mLeavingRadio.isChecked()) {
-                    values[1] = 0;
+                    values[1] = 1;
                 } else if(mStayRadio.isChecked()) {
-                    values[1] = (byte)1;
-                } else if(mPatrolRadio.isChecked()) {
                     values[1] = (byte)2;
+                } else if(mPatrolRadio.isChecked()) {
+                    values[1] = (byte)3;
                 }
                 break;
             case 4:
@@ -681,6 +689,10 @@ public class DeviceConfigureActivity extends Activity {
                 get2ByteFloat(str, values, 6);
                 str = mWardCeilingHeight.getText().toString();
                 get2ByteFloat(str, values, 8);
+                break;
+            case 8:
+                values = new byte[FUSION_GUARD_CONFIG_LENGTH_GROUP_8];
+                values[1] = mDebuggingMode.isChecked()?(byte)1:0;
                 break;
             default:
                 values = null;
@@ -1033,7 +1045,7 @@ public class DeviceConfigureActivity extends Activity {
                 mBluetoothLeService.readCharacteristic(characteristic);
                 group_id++;
                 if(4 == group_id) group_id++;
-                if(8 > group_id) h.postDelayed(r, 1000);
+                if(9 > group_id) h.postDelayed(r, 1000);
             }
         }
     };
@@ -1116,55 +1128,65 @@ public class DeviceConfigureActivity extends Activity {
     }
 
     private void displayCurrentConfig(byte[] value) {
-        switch(value[0]) {
-            case 1:
-                mIPCameraIPAddress_1.setText(String.format("%d", getIntFromByte1(value, 1)));
-                mIPCameraIPAddress_2.setText(String.format("%d", getIntFromByte1(value, 2)));
-                mIPCameraIPAddress_3.setText(String.format("%d", getIntFromByte1(value, 3)));
-                mIPCameraIPAddress_4.setText(String.format("%d", getIntFromByte1(value, 4)));
-                mFTPIPAddress_1.setText(String.format("%d", getIntFromByte1(value, 5)));
-                mFTPIPAddress_2.setText(String.format("%d", getIntFromByte1(value, 6)));
-                mFTPIPAddress_3.setText(String.format("%d", getIntFromByte1(value, 7)));
-                mFTPIPAddress_4.setText(String.format("%d", getIntFromByte1(value, 8)));
-                mSocketServerIPAddress_1.setText(String.format("%d", getIntFromByte1(value, 9)));
-                mSocketServerIPAddress_2.setText(String.format("%d", getIntFromByte1(value, 10)));
-                mSocketServerIPAddress_3.setText(String.format("%d", getIntFromByte1(value, 11)));
-                mSocketServerIPAddress_4.setText(String.format("%d", getIntFromByte1(value, 12)));
-                break;
-            case 2:
-                mIPCameraEnable.setChecked(0 < value[1]);
-                mIPCameraCaptureFreq.setText(String.format("%d", getIntFromByte2(value, 2)));
-                mLogUploadFreq.setText(String.format("%d", getIntFromByte2(value, 4)));
-                mLogUploadSize.setText(String.format("%d", getIntFromByte2(value, 6)));
-                mFusionGuardEnable.setChecked(0 < getIntFromByte1(value, 8));
-                break;
-            case 3:
-                int mode = getIntFromByte1(value, 1);
-                if(0 == mode) mLeavingRadio.setChecked(true);
-                else if(1 == mode) mStayRadio.setChecked(true);
-                else if(2 == mode) mPatrolRadio.setChecked(true);
-                break;
-            case 5:
-                mPatrolInterval.setText(String.format("%d", getIntFromByte2(value, 1)));
-                mPatrolTempDiffThreshold.setText(getFloatFromByte2(value, 3));
-                mPatrolObjectSize.setText(String.format("%d", getIntFromByte1(value, 5)));
-                mPatrolCeilingHeight.setText(getFloatFromByte2(value, 6));
-                break;
-            case 6:
-                mStayAlarmTime.setText(String.format("%d", getIntFromByte2(value, 1)));
-                mStayTempDiffThreshold.setText(getFloatFromByte2(value, 3));
-                mStayObjctSize.setText(String.format("%d", getIntFromByte1(value, 5)));
-                mBathroomLength.setText(getFloatFromByte2(value, 6));
-                mBathroomWidth.setText(getFloatFromByte2(value, 8));
-                mBathroomHeight.setText(getFloatFromByte2(value, 10));
-                break;
-            case 7:
-                mWardTempDiffThreshold.setText(getFloatFromByte2(value, 1));
-                mWardObjctSize.setText(String.format("%d", getIntFromByte1(value, 3)));
-                mBedLength.setText(getFloatFromByte2(value, 4));
-                mBedWidth.setText(getFloatFromByte2(value, 6));
-                mWardCeilingHeight.setText(getFloatFromByte2(value, 8));
-                break;
+        try {
+            switch (value[0]) {
+                case 1:
+                    mIPCameraIPAddress_1.setText(String.format("%d", getIntFromByte1(value, 1)));
+                    mIPCameraIPAddress_2.setText(String.format("%d", getIntFromByte1(value, 2)));
+                    mIPCameraIPAddress_3.setText(String.format("%d", getIntFromByte1(value, 3)));
+                    mIPCameraIPAddress_4.setText(String.format("%d", getIntFromByte1(value, 4)));
+                    mFTPIPAddress_1.setText(String.format("%d", getIntFromByte1(value, 5)));
+                    mFTPIPAddress_2.setText(String.format("%d", getIntFromByte1(value, 6)));
+                    mFTPIPAddress_3.setText(String.format("%d", getIntFromByte1(value, 7)));
+                    mFTPIPAddress_4.setText(String.format("%d", getIntFromByte1(value, 8)));
+                    mSocketServerIPAddress_1.setText(String.format("%d", getIntFromByte1(value, 9)));
+                    mSocketServerIPAddress_2.setText(String.format("%d", getIntFromByte1(value, 10)));
+                    mSocketServerIPAddress_3.setText(String.format("%d", getIntFromByte1(value, 11)));
+                    mSocketServerIPAddress_4.setText(String.format("%d", getIntFromByte1(value, 12)));
+                    mSocketServerIPAddress_Port.setText(String.format("%d", getIntFromByte2(value, 13)));
+                    break;
+                case 2:
+                    mIPCameraEnable.setChecked(0 < value[1]);
+                    mIPCameraCaptureFreq.setText(String.format("%d", getIntFromByte2(value, 2)));
+                    mLogUploadFreq.setText(String.format("%d", getIntFromByte2(value, 4)));
+                    mLogUploadSize.setText(String.format("%d", getIntFromByte2(value, 6)));
+                    mFusionGuardEnable.setChecked(0 < getIntFromByte1(value, 8));
+                    break;
+                case 3:
+                    int mode = getIntFromByte1(value, 1);
+                    Log.d("MIN", "Detection Mode: " + mode);
+                    if (1 == mode) mLeavingRadio.setChecked(true);
+                    else if (2 == mode) mStayRadio.setChecked(true);
+                    else if (3 == mode) mPatrolRadio.setChecked(true);
+                    break;
+                case 5:
+                    mPatrolInterval.setText(String.format("%d", getIntFromByte2(value, 1)));
+                    mPatrolTempDiffThreshold.setText(getFloatFromByte2(value, 3));
+                    mPatrolObjectSize.setText(String.format("%d", getIntFromByte1(value, 5)));
+                    mPatrolCeilingHeight.setText(getFloatFromByte2(value, 6));
+                    break;
+                case 6:
+                    mStayAlarmTime.setText(String.format("%d", getIntFromByte2(value, 1)));
+                    mStayTempDiffThreshold.setText(getFloatFromByte2(value, 3));
+                    mStayObjctSize.setText(String.format("%d", getIntFromByte1(value, 5)));
+                    mBathroomLength.setText(getFloatFromByte2(value, 6));
+                    mBathroomWidth.setText(getFloatFromByte2(value, 8));
+                    mBathroomHeight.setText(getFloatFromByte2(value, 10));
+                    break;
+                case 7:
+                    mWardTempDiffThreshold.setText(getFloatFromByte2(value, 1));
+                    mWardObjctSize.setText(String.format("%d", getIntFromByte1(value, 3)));
+                    mBedLength.setText(getFloatFromByte2(value, 4));
+                    mBedWidth.setText(getFloatFromByte2(value, 6));
+                    mWardCeilingHeight.setText(getFloatFromByte2(value, 8));
+                    break;
+                case 8:
+                    Log.d("MIN", String.format("[Group 8] 0x%02x", value[1]));
+                    mDebuggingMode.setChecked(0 < value[1]);
+                    break;
+            }
+        } catch(Exception ex) {
+            Log.e("MIN", ex.getLocalizedMessage());
         }
     }
 

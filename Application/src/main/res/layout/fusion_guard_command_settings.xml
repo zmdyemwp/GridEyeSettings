@@ -6,7 +6,7 @@
     android:background="#ff7f7f">
 
     <TextView
-        android:text="Fusion Guard Command"
+        android:text="Detection Mode"
         android:textSize="@dimen/chapter_title_font_size"
         android:textStyle="bold"
         android:layout_width="match_parent"
@@ -22,7 +22,7 @@
         android:layout_marginBottom="24dp">
 
         <RadioButton
-            android:text="Leaving"
+            android:text="Bed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -33,7 +33,7 @@
             android:layout_weight="1" />
 
         <RadioButton
-            android:text="Stay"
+            android:text="Bathroom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
@@ -43,7 +43,7 @@
             android:layout_weight="1" />
 
         <RadioButton
-            android:text="Patrol"
+            android:text="SPR (Protection Room)"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
@@ -54,7 +54,7 @@
     </RadioGroup>
 
     <Button
-        android:text="Reset Fusion Guard"
+        android:text="Restart Detecting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/reset_fusion_guard"

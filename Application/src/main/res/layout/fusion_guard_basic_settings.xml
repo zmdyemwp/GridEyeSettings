@@ -153,7 +153,7 @@
         android:layout_marginBottom="24dp">
 
         <TextView
-            android:text="Log Uploading Freq (sec):"
+            android:text="Log Uploading Freq (Num of log files):"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/sub_title_font_size"
@@ -243,6 +243,20 @@
             android:ems="10"
             android:id="@+id/socket_ip_4"
             android:layout_weight="1" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="12dp"
+            android:text=":"/>
+
+        <EditText
+            android:id="@+id/socket_ip_port"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:ems="10"
+            android:inputType="number" />
     </LinearLayout>
 
     <include layout="@layout/division"
@@ -250,7 +264,7 @@
         android:layout_height="wrap_content" />
 
     <Switch
-        android:text="Fusion Guard"
+        android:text="Detection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="@dimen/main_title_font_size"
