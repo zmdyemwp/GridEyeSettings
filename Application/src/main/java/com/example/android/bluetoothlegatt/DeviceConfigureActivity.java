@@ -230,11 +230,11 @@ public class DeviceConfigureActivity extends Activity {
         String str = mET_DiffTempThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // ?�數
+            // int
             int b = a.intValue();
             value[1] = (byte)b;
             Log.d(TAG, "value[0] = " + b);
-            // 小數
+            // float
             String numberD = String.valueOf(a);
             numberD = numberD.substring(numberD.indexOf(".")).substring(1);
             int c = Integer.parseInt(numberD);
@@ -263,11 +263,11 @@ public class DeviceConfigureActivity extends Activity {
         /*str = mET_CheckSumMove.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // ?�數
+            // int
             int b = a.intValue();
             value[6] = (byte)b;
             Log.d(TAG, "value[6] = " + b);
-            // 小數
+            // float
             String numberD = String.valueOf(a);
             numberD = numberD.substring(numberD.indexOf(".")).substring(1);
             int c = Integer.parseInt(numberD);
@@ -277,11 +277,11 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_CheckDiffArea.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // ?�數
+            // int
             int b = a.intValue();
             value[8] = (byte)b;
             Log.d(TAG, "value[8] = " + b);
-            // 小數
+            // float
             String numberD = String.valueOf(a);
             numberD = numberD.substring(numberD.indexOf(".")).substring(1);
             int c = Integer.parseInt(numberD);
@@ -297,11 +297,11 @@ public class DeviceConfigureActivity extends Activity {
         /*str = mET_QuiltMoveThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // ?�數
+            // int
             int b = a.intValue();
             value[11] = (byte)b;
             Log.d(TAG, "value[11] = " + b);
-            // 小數
+            // float
             String numberD = String.valueOf(a);
             numberD = numberD.substring(numberD.indexOf(".")).substring(1);
             int c = Integer.parseInt(numberD);
@@ -311,11 +311,11 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_QuiltAreaThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // ?�數
+            // int
             int b = a.intValue();
             value[13] = (byte)b;
             Log.d(TAG, "value[13] = " + b);
-            // 小數
+            // float
             String numberD = String.valueOf(a);
             numberD = numberD.substring(numberD.indexOf(".")).substring(1);
             int c = Integer.parseInt(numberD);
@@ -457,6 +457,7 @@ public class DeviceConfigureActivity extends Activity {
     TextView mIPCameraIPAddress_3;
     TextView mIPCameraIPAddress_4;
     TextView mIPCameraCaptureFreq;
+    Switch mFTPEnable;
     TextView mFTPIPAddress_1;
     TextView mFTPIPAddress_2;
     TextView mFTPIPAddress_3;
@@ -503,6 +504,7 @@ public class DeviceConfigureActivity extends Activity {
         mIPCameraIPAddress_3 = (TextView)main.findViewById(R.id.ip_camera_ip_address_3);
         mIPCameraIPAddress_4 = (TextView)main.findViewById(R.id.ip_camera_ip_address_4);
         mIPCameraCaptureFreq = (TextView)main.findViewById(R.id.ip_camera_capture_freq);
+        mFTPEnable = (Switch)findViewById(R.id.ftp_switch);
         mFTPIPAddress_1 = (TextView)main.findViewById(R.id.ftp_addr_1);
         mFTPIPAddress_2 = (TextView)main.findViewById(R.id.ftp_addr_2);
         mFTPIPAddress_3 = (TextView)main.findViewById(R.id.ftp_addr_3);
@@ -561,6 +563,8 @@ public class DeviceConfigureActivity extends Activity {
     }
 
     void commit() {
+        writeConfigGroup(8);
+        sleep(500);
         writeConfigGroup(1);
         sleep(500);
         writeConfigGroup(2);
@@ -573,8 +577,8 @@ public class DeviceConfigureActivity extends Activity {
         writeConfigGroup(6);
         sleep(500);
         writeConfigGroup(7);
-        sleep(500);
-        writeConfigGroup(8);
+        //sleep(500);
+        //writeConfigGroup(8);
     }
 
     private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_1 = 15;
@@ -584,7 +588,7 @@ public class DeviceConfigureActivity extends Activity {
     private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_5 = 8;
     private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_6 = 12;
     private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_7 = 10;
-    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_8 = 2;
+    private static final int FUSION_GUARD_CONFIG_LENGTH_GROUP_8 = 3;
 
 
     void writeConfigGroup(int group) {
@@ -693,6 +697,7 @@ public class DeviceConfigureActivity extends Activity {
             case 8:
                 values = new byte[FUSION_GUARD_CONFIG_LENGTH_GROUP_8];
                 values[1] = mDebuggingMode.isChecked()?(byte)1:0;
+                values[2] = mFTPEnable.isChecked()?(byte)1:0;
                 break;
             default:
                 values = null;
@@ -887,11 +892,11 @@ public class DeviceConfigureActivity extends Activity {
         /*String str = mET_DiffTempThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // ?�數
+            // int
             int b = a.intValue();
             //value[0] = (byte)b;
             Log.d(TAG, "value[0] = " + b);
-            // 小數
+            // int�數
             String numberD = String.valueOf(a);
             numberD = numberD.substring(numberD.indexOf(".")).substring(1);
             int c = Integer.parseInt(numberD);
@@ -920,7 +925,7 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_CheckSumMove.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // ?�數
+            // int
             int b = a.intValue();
             //value[6] = (byte)b;
             Log.d(TAG, "value[6] = " + b);
@@ -934,7 +939,7 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_CheckDiffArea.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // ?�數
+            // int
             int b = a.intValue();
             //value[8] = (byte)b;
             Log.d(TAG, "value[8] = " + b);
@@ -954,7 +959,7 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_QuiltMoveThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // ?�數
+            // int
             int b = a.intValue();
             //value[11] = (byte)b;
             Log.d(TAG, "value[11] = " + b);
@@ -968,7 +973,7 @@ public class DeviceConfigureActivity extends Activity {
         str = mET_QuiltAreaThresh.getText().toString();
         if(!TextUtils.isEmpty(str)){
             Float a = Float.parseFloat(str);
-            // ?�數
+            // int
             int b = a.intValue();
             //value[13] = (byte)b;
             Log.d(TAG, "value[13] = " + b);
@@ -1183,6 +1188,11 @@ public class DeviceConfigureActivity extends Activity {
                 case 8:
                     Log.d("MIN", String.format("[Group 8] 0x%02x", value[1]));
                     mDebuggingMode.setChecked(0 < value[1]);
+                    if(value.length > 2) {
+                        mFTPEnable.setChecked(0 < value[2]);
+                    } else {
+                        mFTPEnable.setChecked(false);
+                    }
                     break;
             }
         } catch(Exception ex) {
